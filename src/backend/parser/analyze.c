@@ -388,6 +388,14 @@ transformDeleteStmt(ParseState *pstate, DeleteStmt *stmt)
 
 	qry->returningList = transformReturningList(pstate, stmt->returningList);
 
+	// Start of CSGBD delete-update-limit modification
+	/* transform LIMIT */
+	qry->limitOffset = transformLimitClause(pstate, stmt->limitOffset,
+											EXPR_KIND_OFFSET, "OFFSET");
+	qry->limitCount = transformLimitClause(pstate, stmt->limitCount,
+										   EXPR_KIND_LIMIT, "LIMIT");
+	// End of CSGBD delete-update-limit modification
+
 	/* done building the range table and jointree */
 	qry->rtable = pstate->p_rtable;
 	qry->jointree = makeFromExpr(pstate->p_joinlist, qual);
