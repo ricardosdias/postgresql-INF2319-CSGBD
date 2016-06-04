@@ -1231,6 +1231,10 @@ typedef struct DeleteStmt
 	List	   *usingClause;	/* optional using clause for more tables */
 	Node	   *whereClause;	/* qualifications */
 	List	   *returningList;	/* list of expressions to return */
+	// Start of CSGBD delete-update-limit modification
+	Node	   *limitOffset;	/* # of result tuples to skip */
+	Node	   *limitCount;		/* # of result tuples to return */
+	// End of CSGBD delete-update-limit modification
 	WithClause *withClause;		/* WITH clause */
 } DeleteStmt;
 
