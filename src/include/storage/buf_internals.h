@@ -139,6 +139,9 @@ typedef struct BufferDesc
 	BufferTag	tag;			/* ID of page contained in buffer */
 	BufFlags	flags;			/* see bit definitions above */
 	uint16		usage_count;	/* usage counter for clock sweep code */
+	// Start of CSGBD buffer-manager modification
+	clock_t		timestamp;		/* usage for FIFO, LRU and MRU */
+	// End of CSGBD buffer-manager modification
 	unsigned	refcount;		/* # of backends holding pins on buffer */
 	int			wait_backend_pid;		/* backend PID of pin-count waiter */
 

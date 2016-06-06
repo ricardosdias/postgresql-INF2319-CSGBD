@@ -90,6 +90,7 @@ InitBufferPool(void)
 		/*
 		 * Initialize all the buffer headers.
 		 */
+		elog(LOG, "CSGBD InitBufferPool");
 		for (i = 0; i < NBuffers; i++)
 		{
 			BufferDesc *buf = GetBufferDescriptor(i);
@@ -98,6 +99,9 @@ InitBufferPool(void)
 			buf->flags = 0;
 			buf->usage_count = 0;
 			buf->refcount = 0;
+			// Start of CSGBD buffer-manager modification
+			buf->timestamp = clock();
+			// End of CSGBD buffer-manager modification
 			buf->wait_backend_pid = 0;
 
 			SpinLockInit(&buf->buf_hdr_lock);

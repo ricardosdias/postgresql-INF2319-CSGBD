@@ -22,6 +22,16 @@
 
 #define INT_ACCESS_ONCE(var)	((int)(*((volatile int *)&(var))))
 
+// Start of CSGBD buffer-manager modification
+// Defines to test different strategies
+#define CLOCK_SWEEP_STRATEGY 0
+#define LRU_STRATEGY 1
+#define MRU_STRATEGY 2
+#define LFU_STRATEGY 3
+#define FIFO_STRATEGY 4
+#define CLOCKS_PER_SEC 1000
+static int currentStrategy = LRU_STRATEGY;
+// End of CSGBD buffer-manager modification
 
 /*
  * The shared freelist control information.
@@ -284,6 +294,7 @@ StrategyGetBuffer(BufferAccessStrategy strategy)
 			{
 				if (strategy != NULL)
 					AddBufferToRing(strategy, buf);
+				elog(LOG, "CSGBD - Return free buffer");
 				return buf;
 			}
 			UnlockBufHdr(buf);
@@ -292,45 +303,127 @@ StrategyGetBuffer(BufferAccessStrategy strategy)
 	}
 
 	/* Nothing on the freelist, so run the "clock sweep" algorithm */
-	trycounter = NBuffers;
-	for (;;)
+
+	// Start of CSGBD buffer-manager modification
+	elog(LOG, "Nothing on the freelist, so run the clock sweep algorithm");
+	switch (currentStrategy)
 	{
-
-		buf = GetBufferDescriptor(ClockSweepTick());
-
-		/*
-		 * If the buffer is pinned or has a nonzero usage_count, we cannot use
-		 * it; decrement the usage_count (unless pinned) and keep scanning.
-		 */
-		LockBufHdr(buf);
-		if (buf->refcount == 0)
+		case CLOCK_SWEEP_STRATEGY:
 		{
-			if (buf->usage_count > 0)
+			elog(LOG, "Usando CLOCK_SWEEP_STRATEGY");
+			trycounter = NBuffers;
+			for (;;)
 			{
-				buf->usage_count--;
-				trycounter = NBuffers;
+
+				buf = GetBufferDescriptor(ClockSweepTick());
+
+				/*
+				 * If the buffer is pinned or has a nonzero usage_count, we cannot use
+				 * it; decrement the usage_count (unless pinned) and keep scanning.
+				 */
+				LockBufHdr(buf);
+				if (buf->refcount == 0)
+				{
+					if (buf->usage_count > 0)
+					{
+						buf->usage_count--;
+						trycounter = NBuffers;
+					}
+					else
+					{
+						/* Found a usable buffer */
+						if (strategy != NULL)
+							AddBufferToRing(strategy, buf);
+						return buf;
+					}
+				}
+				else if (--trycounter == 0)
+				{
+					/*
+					 * We've scanned all the buffers without making any state changes,
+					 * so all the buffers are pinned (or were when we looked at them).
+					 * We could hope that someone will free one eventually, but it's
+					 * probably better to fail than to risk getting stuck in an
+					 * infinite loop.
+					 */
+					UnlockBufHdr(buf);
+					elog(ERROR, "no unpinned buffers available");
+				}
+				UnlockBufHdr(buf);
 			}
-			else
-			{
-				/* Found a usable buffer */
-				if (strategy != NULL)
-					AddBufferToRing(strategy, buf);
-				return buf;
-			}
-		}
-		else if (--trycounter == 0)
+			break;
+		} // close case CLOCK_SWEEP_STRATEGY
+		///*
+		case LRU_STRATEGY:
 		{
-			/*
-			 * We've scanned all the buffers without making any state changes,
-			 * so all the buffers are pinned (or were when we looked at them).
-			 * We could hope that someone will free one eventually, but it's
-			 * probably better to fail than to risk getting stuck in an
-			 * infinite loop.
-			 */
-			UnlockBufHdr(buf);
-			elog(ERROR, "no unpinned buffers available");
-		}
-		UnlockBufHdr(buf);
+			int i = 0;
+			int selectedBuffer = 0;
+			double minUsage = 0.0;
+			double elapsedTime;
+			clock_t currentTime;
+			elog(LOG, "Usando LRU");
+			// LRU ou FIFO algorithm
+			trycounter = NBuffers;
+			for (;;)
+			{
+				minUsage = 0.0;
+				currentTime = clock();
+				// Looking for the buffer with the minimium quantity of usage
+				for( i = 0; i < NBuffers; i++ )
+				{
+					buf = &BufferDescriptors[i];
+					// Refcount can be changed concurrently but it is checked
+					// with locks again so just checking to avoid useless loops
+					elapsedTime = (double) (currentTime-buf->timestamp) / CLOCKS_PER_SEC;
+					if( elapsedTime > minUsage && buf->refcount == 0 )
+					// a maior diferença entre o tempo atual e o tempo de uso do buffer indica o menos recente
+					{
+						minUsage = elapsedTime;
+						selectedBuffer = i;
+					}
+				}
+				// Getting the buffer with the lesser usage count
+				buf = &BufferDescriptors[selectedBuffer];
+				// To avoid crashes
+				if( buf == NULL )
+				{
+					elog(LOG, "Error while doing the FRU-FIFO loop");
+					break;
+				}
+
+				LockBufHdr(buf);
+
+				// If the buffer is pinned, we cannot use
+				// it; decrement the usage_count (unless pinned) and keep scanning
+
+				if (buf->refcount == 0)
+				{
+					if (buf->usage_count > 0)
+					{
+						buf->usage_count--;
+						trycounter = NBuffers;
+					}
+					// Found a usable buffer
+					if (strategy != NULL)
+						AddBufferToRing(strategy, buf);
+					return buf;
+				}
+				else if (--trycounter == 0)
+				{
+					// We've scanned all the buffers without making any state changes,
+					// so all the buffers are pinned (or were when we looked at them).
+					// We could hope that someone will free one eventually, but it's
+					// probably better to fail than to risk getting stuck in an
+					// infinite loop.
+					//
+					UnlockBufHdr(buf);
+					elog(ERROR, "no unpinned buffers available");
+				}
+				UnlockBufHdr(buf);
+			} // close for (;;)
+			break;
+		} // close case LRU_STRATEGY e FIFO:
+		//*/
 	}
 }
 
