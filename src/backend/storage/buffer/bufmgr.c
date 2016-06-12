@@ -80,9 +80,6 @@ bool		zero_damaged_pages = false;
 int			bgwriter_lru_maxpages = 100;
 double		bgwriter_lru_multiplier = 2.0;
 bool		track_io_timing = false;
-// Start of CSGBD buffer-manager modification
-bool 		fifo = false; /*(false quando nao for FIFO e true quando for)*/
-// End of CSGBD buffer-manager modification
 
 /*
  * How many buffers PrefetchBuffer callers should try to stay ahead of their
@@ -754,7 +751,6 @@ ReadBuffer_common(SMgrRelation smgr, char relpersistence, ForkNumber forkNum,
 	// Start of CSGBD buffer-manager modification
 	// Since a new buffer has been successfully allocated, the timestamp should be initialized.
 	bufHdr->timestamp = clock();
-	//elog(LOG, "CSGBD set bufHdr->timestamp = clock()");
 	// End of CSGBD buffer-manager modification
 
 	bufBlock = isLocalBuf ? LocalBufHdrGetBlock(bufHdr) : BufHdrGetBlock(bufHdr);
@@ -1450,9 +1446,8 @@ PinBuffer(volatile BufferDesc *buf, BufferAccessStrategy strategy)
 		buf->refcount++;
 
 		// Start of CSGBD buffer-manager modification
-		// Since we have a hit, the timestamp must be updated, unless the strategy is FIFO
-		if (!fifo)
-			buf->timestamp = clock();
+		// Since we have a hit, the timestamp must be updated
+		buf->timestamp = clock();
 		// End of CSGBD buffer-manager modification
 
 		if (strategy == NULL)
