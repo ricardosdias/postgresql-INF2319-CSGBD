@@ -379,6 +379,17 @@ static const struct config_enum_entry huge_pages_options[] = {
 	{NULL, 0, false}
 };
 
+// CSGBD
+static const struct config_enum_entry buffer_manager_strategy_options[] = {
+	{"clock_strategy", CLOCK_STRATEGY, false},
+	{"lru_strategy", LRU_STRATEGY, false},
+	{"mru_strategy", MRU_STRATEGY, false},
+	{"lfu_strategy", LFU_STRATEGY, false},
+	{"fifo_strategy", FIFO_STRATEGY, false},
+	{NULL, 0, false}
+};
+// end CSGBD
+
 /*
  * Options for enum values stored in other modules
  */
@@ -435,6 +446,10 @@ char	   *application_name;
 int			tcp_keepalives_idle;
 int			tcp_keepalives_interval;
 int			tcp_keepalives_count;
+
+// CSGBD
+int			buffer_manager_strategy = CLOCK_STRATEGY;
+// CSGBD
 
 /*
  * SSL renegotiation was been removed in PostgreSQL 9.5, but we tolerate it
@@ -3642,6 +3657,18 @@ static struct config_enum ConfigureNamesEnum[] =
 		HUGE_PAGES_TRY, huge_pages_options,
 		NULL, NULL, NULL
 	},
+
+	// CSGBD
+	{
+		{"buffer_manager_strategy", PGC_SUSET, CUSTOM_OPTIONS,
+			gettext_noop("Sets the buffer manager strategy."),
+			NULL
+		},
+		&buffer_manager_strategy,
+		CLOCK_STRATEGY, buffer_manager_strategy_options,
+		NULL, NULL, NULL
+	},
+	// CSGBD
 
 	/* End-of-list marker */
 	{
