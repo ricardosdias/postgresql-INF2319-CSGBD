@@ -20,6 +20,16 @@
 #include "storage/relfilenode.h"
 #include "utils/relcache.h"
 
+// CSGBD
+
+#define CLOCK_STRATEGY 0
+#define LRU_STRATEGY 1
+#define MRU_STRATEGY 2
+#define LFU_STRATEGY 3
+#define FIFO_STRATEGY 4
+
+// end CSGBD
+
 typedef void *Block;
 
 /* Possible arguments for GetAccessStrategy() */
