@@ -268,6 +268,10 @@ extern int	tcp_keepalives_idle;
 extern int	tcp_keepalives_interval;
 extern int	tcp_keepalives_count;
 
+// CSGBD
+extern int	buffer_manager_strategy;
+// CSGBD
+
 #ifdef TRACE_SORT
 extern bool trace_sort;
 #endif
