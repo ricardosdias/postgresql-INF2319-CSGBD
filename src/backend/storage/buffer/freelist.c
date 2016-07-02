@@ -19,19 +19,17 @@
 #include "storage/buf_internals.h"
 #include "storage/bufmgr.h"
 #include "storage/proc.h"
-// CSGBD
+
+// Start of CSGBD buffer-manager modification
+#include <time.h>
+// End of CSGBD buffer-manager modification
+
+// Start of CSGBD buffer-manager-strategy-parameter modification
 #include "utils/guc.h"
-// CSGBD
+// End of CSGBD buffer-manager-strategy-parameter modification
 
 #define INT_ACCESS_ONCE(var)	((int)(*((volatile int *)&(var))))
 
-// Start of CSGBD buffer-manager modification
-#define CLOCKS_PER_SEC 1000
-// End of CSGBD buffer-manager modification
-
-/*
- * The shared freelist control information.
- */
 typedef struct
 {
 	/* Spinlock: protects the values below */
@@ -379,7 +377,6 @@ StrategyGetBuffer(BufferAccessStrategy strategy)
 	for (;;)
 	{
 		// Start of CSGBD buffer-manager modification
-		//elog(LOG, "strategy: %d", buffer_manager_strategy);
 		switch (buffer_manager_strategy)
 		{
 			case CLOCK_STRATEGY:

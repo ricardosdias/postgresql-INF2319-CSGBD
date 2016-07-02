@@ -268,9 +268,10 @@ extern int	tcp_keepalives_idle;
 extern int	tcp_keepalives_interval;
 extern int	tcp_keepalives_count;
 
-// CSGBD
+// Start of CSGBD buffer-manager-strategy-parameter modification
+// Declare buffer_manager_strategy external variable
 extern int	buffer_manager_strategy;
-// CSGBD
+// End of CSGBD buffer-manager-strategy-parameter modification
 
 #ifdef TRACE_SORT
 extern bool trace_sort;

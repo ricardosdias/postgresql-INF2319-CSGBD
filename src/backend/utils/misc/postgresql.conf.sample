@@ -628,9 +628,10 @@
 #------------------------------------------------------------------------------
 
 # Add settings for extensions here
-# CSGBD
+// Start of CSGBD buffer-manager-strategy-parameter modification
 #buffer_manager_strategy = clock_strategy		# Valid values are:
 					#   lru_strategy
 					#   mru_strategy
 					#   lfu_strategy
 					#   fifo_strategy
+// End of CSGBD buffer-manager-strategy-parameter modification

@@ -17,6 +17,9 @@
 #include "storage/bufmgr.h"
 #include "storage/buf_internals.h"
 
+// Start of CSGBD buffer-manager modification
+#include <time.h>
+// End of CSGBD buffer-manager modification
 
 BufferDescPadded *BufferDescriptors;
 char	   *BufferBlocks;
@@ -90,7 +93,6 @@ InitBufferPool(void)
 		/*
 		 * Initialize all the buffer headers.
 		 */
-		elog(LOG, "CSGBD InitBufferPool");
 		for (i = 0; i < NBuffers; i++)
 		{
 			BufferDesc *buf = GetBufferDescriptor(i);

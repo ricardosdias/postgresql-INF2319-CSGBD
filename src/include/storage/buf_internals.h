@@ -23,6 +23,10 @@
 #include "storage/spin.h"
 #include "utils/relcache.h"
 
+ // Start of CSGBD buffer-manager modification
+#include <time.h>
+// End of CSGBD buffer-manager modification
+
 
 /*
  * Flags for buffer descriptors

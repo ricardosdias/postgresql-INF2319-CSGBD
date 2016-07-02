@@ -51,6 +51,10 @@
 #include "utils/resowner_private.h"
 #include "utils/timestamp.h"
 
+ // Start of CSGBD buffer-manager modification
+#include <time.h>
+// End of CSGBD buffer-manager modification
+
 
 /* Note: these two macros only work on shared buffers, not local ones! */
 #define BufHdrGetBlock(bufHdr)	((Block) (BufferBlocks + ((Size) (bufHdr)->buf_id) * BLCKSZ))
