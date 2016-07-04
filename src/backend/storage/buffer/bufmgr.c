@@ -55,6 +55,10 @@
 #include <time.h>
 // End of CSGBD buffer-manager modification
 
+ // Start of CSGBD buffer-manager-strategy-parameter modification
+#include "utils/guc.h"
+// End of CSGBD buffer-manager-strategy-parameter modification
+
 
 /* Note: these two macros only work on shared buffers, not local ones! */
 #define BufHdrGetBlock(bufHdr)	((Block) (BufferBlocks + ((Size) (bufHdr)->buf_id) * BLCKSZ))
@@ -1451,7 +1455,8 @@ PinBuffer(volatile BufferDesc *buf, BufferAccessStrategy strategy)
 
 		// Start of CSGBD buffer-manager modification
 		// Since we have a hit, the timestamp must be updated
-		buf->timestamp = clock();
+		if (buffer_manager_strategy != FIFO_STRATEGY)
+			buf->timestamp = clock();
 		// End of CSGBD buffer-manager modification
 
 		if (strategy == NULL)

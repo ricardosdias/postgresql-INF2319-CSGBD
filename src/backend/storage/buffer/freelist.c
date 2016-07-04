@@ -184,7 +184,7 @@ LRUTick(void)
 
 	for( i = 0; i < NBuffers; i++ ) {
 		buf = &BufferDescriptors[i];
-		elapsedTime = (double) (currentTime-buf->timestamp)/CLOCKS_PER_SEC;
+		elapsedTime = (double) (currentTime - buf->timestamp)/CLOCKS_PER_SEC;
 		if( elapsedTime > minUsage && buf->refcount == 0)
 		{
 			minUsage = elapsedTime;
@@ -208,7 +208,7 @@ MRUTick(void)
 
 	for( i = 0; i < NBuffers; i++ ) {
 		buf = &BufferDescriptors[i];
-		elapsedTime = (double) (currentTime-buf->timestamp)/CLOCKS_PER_SEC;
+		elapsedTime = (double) (currentTime - buf->timestamp)/CLOCKS_PER_SEC;
 		if( elapsedTime < maxUsage && buf->refcount == 0 )
 		{
 			maxUsage = elapsedTime;
