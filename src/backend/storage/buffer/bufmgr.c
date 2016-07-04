@@ -51,11 +51,11 @@
 #include "utils/resowner_private.h"
 #include "utils/timestamp.h"
 
- // Start of CSGBD buffer-manager modification
+// Start of CSGBD buffer-manager modification
 #include <time.h>
 // End of CSGBD buffer-manager modification
 
- // Start of CSGBD buffer-manager-strategy-parameter modification
+// Start of CSGBD buffer-manager-strategy-parameter modification
 #include "utils/guc.h"
 // End of CSGBD buffer-manager-strategy-parameter modification
 
